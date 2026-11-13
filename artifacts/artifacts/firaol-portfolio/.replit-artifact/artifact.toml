@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Firaol Allo Hussen Portfolio"
+description = "A professional portfolio for Firaol Allo Hussen, presenting his IT infrastructure experience and verified public GitHub projects."
+version = "1.0.0"
+id = "artifacts/firaol-portfolio"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25330
+
+[services.development]
+run = "pnpm --filter @workspace/firaol-portfolio run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/firaol-portfolio", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/firaol-portfolio/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25330"
+BASE_PATH = "/"

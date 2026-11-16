@@ -44,7 +44,7 @@ const projects = [
   },
   {
     name: 'debalmoti-menu',
-    description: 'A responsive English–Amharic coffee-house menu featuring hot and cold drinks, ingredient details, Telebirr payment information, and a dark/light theme toggle.',
+    description: 'An English–Amharic menu for Debalmoti Coffee House, with a responsive layout for hot and cold drinks, ingredient details, Telebirr payment information and QR code, plus a dark/light theme toggle.',
     stack: 'HTML',
     category: 'HTML',
     demoUrl: 'https://ebnody.github.io/debalmoti-menu/',

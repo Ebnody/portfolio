@@ -52,7 +52,7 @@ const projects = [
   },
   {
     name: 'MKDSS-CMS',
-    description: 'Public repository name: MKDSS-CMS. Further product details are not stated here.',
+    description: 'Compliance document management system for managing controlled documents, document requests, review and approval workflows, reading acknowledgments, and compliance reporting.',
     stack: 'PUBLIC REPOSITORY',
     category: 'MKDSS',
     url: 'https://github.com/Ebnody/MKDSS-CMS',
@@ -60,7 +60,7 @@ const projects = [
   },
   {
     name: 'MKDSS-IT-Helpdesk',
-    description: 'Public repository name: MKDSS-IT-Helpdesk. Further product details are not stated here.',
+    description: 'IT Helpdesk system for handling support tickets and service requests, including ticket assignment, approval workflows, reporting, notifications, user management, and administration.',
     stack: 'PUBLIC REPOSITORY',
     category: 'MKDSS',
     url: 'https://github.com/Ebnody/MKDSS-IT-Helpdesk',
@@ -68,7 +68,7 @@ const projects = [
   },
   {
     name: 'MKDSS-VMS',
-    description: 'Public repository name: MKDSS-VMS. Further product details are not stated here.',
+    description: 'Python-based Visitor Management System with login, visitor registration, check-in and check-out, badge management, host approvals, reports, user management, and audit records.',
     stack: 'PUBLIC REPOSITORY',
     category: 'MKDSS',
     url: 'https://github.com/Ebnody/MKDSS-VMS',

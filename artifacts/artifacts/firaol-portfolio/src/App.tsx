@@ -44,9 +44,10 @@ const projects = [
   },
   {
     name: 'debalmoti-menu',
-    description: 'A simple HTML repository. The public repository does not establish a live deployment or additional product details.',
+    description: 'A responsive English–Amharic coffee-house menu featuring hot and cold drinks, ingredient details, Telebirr payment information, and a dark/light theme toggle.',
     stack: 'HTML',
     category: 'HTML',
+    demoUrl: 'https://ebnody.github.io/debalmoti-menu/',
     url: 'https://github.com/Ebnody/debalmoti-menu',
     icon: Laptop,
   },

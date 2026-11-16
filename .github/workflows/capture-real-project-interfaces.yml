@@ -1,0 +1,190 @@
+name: Capture real project interfaces
+
+on:
+  push:
+    branches:
+      - portfolio/real-ui-captures
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: eqied
+          POSTGRES_USER: eqied
+          POSTGRES_PASSWORD: eqied_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eqied -d eqied"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out portfolio repository
+        uses: actions/checkout@v4
+        with:
+          path: portfolio
+
+      - name: Check out public project repositories
+        uses: actions/checkout@v4
+        with:
+          repository: Ebnody/MKDSS-CMS
+          path: projects/MKDSS-CMS
+      - uses: actions/checkout@v4
+        with:
+          repository: Ebnody/MKDSS-VMS
+          path: projects/MKDSS-VMS
+      - uses: actions/checkout@v4
+        with:
+          repository: Ebnody/MKDSS-IT-Helpdesk
+          path: projects/MKDSS-IT-Helpdesk
+      - uses: actions/checkout@v4
+        with:
+          repository: Ebnody/Eqied
+          path: projects/Eqied
+      - uses: actions/checkout@v4
+        with:
+          repository: Ebnody/debalmoti-menu
+          path: projects/debalmoti-menu
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: projects/Eqied/package-lock.json
+
+      - name: Install browser capture tools
+        run: |
+          python -m pip install --upgrade pip playwright pyautogui pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y python3-tk xvfb xauth
+
+      - name: Create screenshot output directory
+        run: mkdir -p portfolio/artifacts/project-screenshots
+
+      - name: Capture MKDSS Compliance Management System login
+        continue-on-error: true
+        working-directory: projects/MKDSS-CMS
+        env:
+          DJANGO_SECRET_KEY: ci-only-not-for-production
+          DJANGO_DEBUG: "False"
+          DJANGO_ALLOWED_HOSTS: 127.0.0.1,localhost
+        run: |
+          python -m pip install -r requirements.txt
+          python manage.py migrate --noinput
+          nohup python manage.py runserver 127.0.0.1:8001 >/tmp/cms.log 2>&1 &
+          for i in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:8001/login/ >/dev/null && break
+            sleep 2
+          done
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              page.goto("http://127.0.0.1:8001/login/", wait_until="networkidle", timeout=60000)
+              page.screenshot(path="../../portfolio/artifacts/project-screenshots/mkdss-cms-login.png", full_page=True)
+              browser.close()
+          PY
+
+      - name: Capture MKDSS IT Helpdesk initial screen
+        continue-on-error: true
+        working-directory: projects/MKDSS-IT-Helpdesk
+        env:
+          SECRET_KEY: ci-only-not-for-production
+        run: |
+          python -m pip install -r requirements.txt
+          nohup python app.py --host 127.0.0.1 --port 5001 >/tmp/helpdesk.log 2>&1 &
+          for i in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:5001/ >/dev/null && break
+            sleep 2
+          done
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              page.goto("http://127.0.0.1:5001/", wait_until="networkidle", timeout=60000)
+              page.screenshot(path="../../portfolio/artifacts/project-screenshots/mkdss-it-helpdesk.png", full_page=True)
+              browser.close()
+          PY
+
+      - name: Capture Eqied public landing page
+        continue-on-error: true
+        working-directory: projects/Eqied
+        env:
+          DATABASE_URL: postgresql://eqied:eqied_ci_only@localhost:5432/eqied
+          DIRECT_DATABASE_URL: postgresql://eqied:eqied_ci_only@localhost:5432/eqied
+          JWT_SECRET: ci-only-not-for-production
+          APP_URL: http://127.0.0.1:3000
+        run: |
+          npm ci
+          npx prisma db push
+          nohup npm run dev -- --hostname 127.0.0.1 --port 3000 >/tmp/eqied.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:3000/ >/dev/null && break
+            sleep 3
+          done
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              page.goto("http://127.0.0.1:3000/", wait_until="networkidle", timeout=90000)
+              page.screenshot(path="../../portfolio/artifacts/project-screenshots/eqied-landing.png", full_page=True)
+              browser.close()
+          PY
+
+      - name: Capture Debalmoti bilingual menu
+        continue-on-error: true
+        working-directory: projects/debalmoti-menu
+        run: |
+          python -m http.server 8002 --bind 127.0.0.1 >/tmp/menu.log 2>&1 &
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:8002/ >/dev/null && break
+            sleep 1
+          done
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              page = browser.new_page(viewport={"width": 1440, "height": 1000}, device_scale_factor=1)
+              page.goto("http://127.0.0.1:8002/", wait_until="networkidle", timeout=60000)
+              page.screenshot(path="../../portfolio/artifacts/project-screenshots/debalmoti-menu.png", full_page=True)
+              browser.close()
+          PY
+
+      - name: Capture MKDSS Visitor Management desktop interface
+        continue-on-error: true
+        working-directory: projects/MKDSS-VMS
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1440x1000x24 >/tmp/xvfb.log 2>&1 &
+          sleep 2
+          python VMS_App.pyw >/tmp/vms.log 2>&1 &
+          sleep 12
+          python - <<'PY'
+          import pyautogui
+          pyautogui.screenshot().save("../../portfolio/artifacts/project-screenshots/mkdss-vms-desktop.png")
+          PY
+
+      - name: Upload captured interfaces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-project-ui-screenshots
+          path: portfolio/artifacts/project-screenshots/
+          if-no-files-found: warn
+          retention-days: 14

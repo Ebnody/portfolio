@@ -380,7 +380,7 @@ function App() {
             ))}
           </div>
           <div className="projects-grid">
-            {visibleProjects.map(({ name, description, stack, demoUrl, url, icon: Icon }) => (
+            {visibleProjects.map(({ name, description, stack, category, demoUrl, url, icon: Icon }) => (
               <article className="project-card" key={name} data-testid={`card-project-${name}`}>
                 <div className="project-top"><Icon size={19} aria-hidden="true" /><span>GITHUB REPOSITORY</span></div>
                 <h3>{name}</h3><p>{description}</p>
@@ -390,12 +390,10 @@ function App() {
                     View repository <ArrowUpRight size={13} aria-hidden="true" />
                   </a>
                 </div>
-                {demoUrl ? (
+                {demoUrl && category !== 'MKDSS' && (
                   <a className="demo-link" href={demoUrl} target="_blank" rel="noreferrer" data-testid={`link-demo-${name}`}>
                     Open live demo <ArrowUpRight size={13} aria-hidden="true" />
                   </a>
-                ) : (
-                  <div className="unverified">Live demo: unverified</div>
                 )}
               </article>
             ))}

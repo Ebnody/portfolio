@@ -383,7 +383,8 @@ function App() {
             {visibleProjects.map(({ name, description, stack, category, demoUrl, url, icon: Icon }) => (
               <article className="project-card" key={name} data-testid={`card-project-${name}`}>
                 <div className="project-top"><Icon size={19} aria-hidden="true" /><span>GITHUB REPOSITORY</span></div>
-                <h3>{name}</h3><p>{description}</p>
+                <h3>{name}</h3>
+                <p className="project-description">{description}</p>
                 <div className="project-foot">
                   <span className="project-stack">{stack}</span>
                   <a className="project-link" href={url} target="_blank" rel="noreferrer" aria-label={`View ${name} on GitHub`} data-testid={`link-project-${name}`}>
